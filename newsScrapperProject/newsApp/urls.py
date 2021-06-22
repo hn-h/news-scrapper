@@ -1,7 +1,11 @@
-from django.urls import path
-from news.views import scrape, news_list
+from django.urls import path, include
+from rest_framework import routers
+from newsApp import views
+
+router = routers.DefaultRouter()
+router.register(r'news', views.NewsAPIView)
 
 urlpatterns = [
-  path('scrape/', scrape, name="scrape"),
-  path('', news_list, name="home"),
+  path('', views.scrape, name="scrape"),
+  path('api/', include(router.urls)),
 ]

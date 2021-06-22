@@ -1,10 +1,15 @@
 from django.shortcuts import render, redirect
+from django.http import HttpResponse
 import requests
 from bs4 import BeautifulSoup as BSoup
 from newsApp.models import News
 
+from rest_framework import viewsets
+from .serializers import NewsSerializer
+
 
 def scrape(request):
+    News.objects.all().delete()
     session = requests.Session()
     session.headers = {"User-Agent": "Googlebot/2.1 (+http://www.google.com/bot.html)"}
     url = "https://www.theonion.com/"
@@ -26,13 +31,8 @@ def scrape(request):
         new_headline.url = link
         new_headline.save()
 
-    return redirect('/')
+    return redirect('/api/news/'+str(News.objects.first().id))
 
-
-def news_list(request):
-    news = News.objects.all()[::-1] #inversed as the latest is the newest
-    context = {
-        'news_list': news,
-    }
-
-    return render(request, "news/home.html", context)
+class NewsAPIView(viewsets.ModelViewSet):
+    queryset = News.objects.all()
+    serializer_class = NewsSerializer
